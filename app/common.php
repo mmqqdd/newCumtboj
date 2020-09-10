@@ -27,8 +27,7 @@ function showError($msg = 'error', $code = 400)
     ]);
 }
 
-
-
+static $expired_time = 3600; //token过期时间。
 
 
 

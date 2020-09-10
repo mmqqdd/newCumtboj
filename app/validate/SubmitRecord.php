@@ -4,8 +4,8 @@ declare (strict_types = 1);
 namespace app\validate;
 
 use think\Validate;
-use app\model\hustoj_problem as Hp;
-use app\model\hustoj_users as Hu;
+use app\model\problem as Hp;
+use app\model\users as Hu;
 class SubmitRecord extends Validate
 {
     /**
@@ -15,13 +15,15 @@ class SubmitRecord extends Validate
      * @var array
      */	
 	protected $rule = [
-        'pid|题目ID' => ['require','checkPid','number'],
-        'code|代码' => ['require'],
-        'language|编程语言' => ['require'],
+        'problem_id|题目ID' => ['require','checkPid','number'],
+        'source|代码' => ['require'],
+        //'language|编程语言' => ['require'],
         'suid|请求的题目' =>['require','checkUid'],
+        'solution_id' =>['require','number']
     ];
     protected $scene = [
-        'submit' => ['pid','code','language'],  
+        'submit' => ['problem_id','source'],
+        'oneSource' =>['solution_id']
     ];
     /**
      * 定义错误信息
@@ -32,11 +34,11 @@ class SubmitRecord extends Validate
     protected $message = [];
 
     public function checkPid($value,$rule,$data){
-        if (Hp::find($value)) return true;
+        if (Hp::where('problem_id',$value)->find()) return true;
         return "没有此题目";
     }
     public function checkUid($value,$rule,$data){
-        if (Hu::find($value)) return true;
+        if (Hu::where('user_id','uid')->find()) return true;
         return "该用户不存在";
     }
     public function sceneSubmit(){
@@ -44,6 +46,9 @@ class SubmitRecord extends Validate
     }
     public function sceneAllRecord(){
         return $this->only(['']);
+    }
+    public function sceneOneSource(){
+        return $this->only(['solution_id']);
     }
     public function sceneOneUserRecord(){
         return $this->only(['suid']);

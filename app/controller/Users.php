@@ -6,21 +6,24 @@ namespace app\controller;
 use think\Request;
 use app\BaseController;
 use app\Token;
-use app\model\hustoj_users as Hu;
+use app\model\users as Hu;
 
-class User extends BaseController{
+class Users extends BaseController{
     /**
      * 调用全局中间件验证token,没有token这一步自动跳过
      * 验证注册信息, 交给register中间件
      * 创建账号
      * 返回用户信息
-     */ 
+     */
     public function register(Request $request){//注册用户
         $userdata=$request->data;
-        $user=Hu::create($userdata)->hidden(['password']);
-        $token=new token('',(string)$user['id']);
+        $userdata['user_id']=$userdata['username'];
+        $userdata['accesstime']= date('Y-m-d H:i:s');
+
+        $user=Hu::create($userdata)->hidden(['password','requiredPassword','uid','token','id']);
+        $token=new token('',(string)$user['username']);
         $data=[
-            'userdata' => $userdata,
+            'userdata' => $user,
             'token' => $token->build(3600),
         ];
         return(showSuccess($data,'注册成功'))   ;
@@ -34,11 +37,15 @@ class User extends BaseController{
      * 返回用户信息
      */
     public function login(Request $request){//用户登录
-        $user=Hu::where("username",$request->data['username'])->find(); //通过用户名查找用户
-        $user->status=1; 
+
+        $user=Hu::where("user_id",$request->data['username'])->find(); //通过用户名查找用户
+        //$user=Hu::select()->toArray();
+        //$user->user_id=1;
+        //halt($user);
+        $user->accesstime = date('Y-m-d H:i:s');
         $user->save(); //改变状态
 
-        $token=new Token('',(string)$user['id']); 
+        $token=new Token('',(string)$user['user_id']);
         $data=[ 
             'token' => $token->build('3600'),
             'userdata' => $user->hidden(["password"]),
@@ -52,11 +59,8 @@ class User extends BaseController{
      * 返回信息
      */
     public function logout(Request $request){//
-        $user=Hu::find($request->id);
-        if($user->status==0) ApiException("",'用户未登录');
-        $user->status=0;
-        $user->save();
-        $request->token->delete();
+        //halt($request->data['token']); //debug
+        $request->data['token']->delete();
         return showSuccess("",'注销成功');
     }
 }

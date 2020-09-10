@@ -18,10 +18,10 @@ Route::get('hello/:name', 'index/hello');
 
 
 
-Route::group('user',function () {  //user组
-    Route::rule('iuo', 'user/register','get|post'); //注册用户
-    Route::rule('li','User/login','get|post');//登录用户
-    Route::rule('lo','User/logout','get|post');//登出用户
+Route::group('users',function () {  //user组
+    Route::rule('iuo', 'users/register','get|post'); //注册用户
+    Route::rule('li','Users/login','get|post');//登录用户
+    Route::rule('lo','Users/logout','get|post');//登出用户
 })->allowCrossDomain();
 
 Route::group(function(){  
@@ -33,4 +33,5 @@ Route::group(function(){
     Route::rule('sub','SubmitRecord/submit','get|post')->middleware(CheckUser::class); //提交题目
     Route::rule('our','SubmitRecord/oneUserRecord','get|post');//获取一个用户的提交记录
     Route::rule('ar','SubmitRecord/allRecord','get|post');//获取所有用户记录
+    Route::rule('os','SubmitRecord/oneSource','get|post');
 })->allowCrossDomain();
